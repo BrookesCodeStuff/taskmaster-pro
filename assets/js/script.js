@@ -66,6 +66,7 @@ $('.list-group').on('blur', 'textarea', function () {
 
   var taskP = $('<p>').addClass('m-1').text(text);
   $(this).replaceWith(taskP);
+  console.log('lost focus');
 });
 
 // Edit and save task dates
@@ -109,7 +110,67 @@ $('.list-group').on('blur', 'input[type="text"]', function () {
   // Replace input with span element
   $(this).replaceWith(taskSpan);
 });
-// modal was triggered
+
+$('.card .list-group').sortable({
+  connectWith: $('.card .list-group'),
+  scroll: false,
+  tolerance: 'pointer',
+  helper: 'clone',
+  activate: function (event) {
+    console.log('activate', this);
+  },
+  deactivate: function (event) {
+    console.log('deactivate', this);
+  },
+  over: function (event) {
+    console.log('over', event.target);
+  },
+  out: function (event) {
+    console.log('out', event.target);
+  },
+  update: function (event) {
+    var tempArr = [];
+    // Loop over the current set of children in sortable list
+    $(this)
+      .children()
+      .each(function () {
+        var text = $(this).find('p').text().trim();
+        var date = $(this).find('span').text().trim();
+
+        tempArr.push({
+          text: text,
+          date: date,
+        });
+      });
+
+    // Trim down lists's ID to match object property
+    var arrName = $(this).attr('id').replace('list-', '');
+
+    // Update array on tasks object and save
+    tasks[arrName] = tempArr;
+    saveTasks();
+  },
+});
+
+$('#trash').droppable({
+  accept: '.card .list-group-item',
+  tolerance: 'touch',
+  drop: function (event, ui) {
+    ui.draggable.remove();
+  },
+  over: function (event, ui) {
+    console.log('over');
+  },
+  out: function (event, ui) {
+    console.log('out');
+  },
+});
+
+// -------------------------------------------------
+//             MODAL FUNCTIONS
+// -------------------------------------------------
+
+// modal was triggered9
 $('#task-form-modal').on('show.bs.modal', function () {
   // clear values
   $('#modalTaskDescription, #modalDueDate').val('');
